@@ -1,13 +1,14 @@
-# cloud-data-engineering-pipeline
-End-to-end cloud data engineering and analytics pipeline using Python, REST APIs, SQL, Azure, dimensional modeling, and Power BI.
-#
 # Real-Time NYC Citi Bike Data Engineering & Analytics Pipeline
 
-This project is a hands-on data engineering project where I am building an end-to-end pipeline using live NYC Citi Bike data.
+An end-to-end data engineering project using Python, REST APIs, Pandas, MySQL, SQLAlchemy, and a structured ETL workflow.
 
-Right now, the project pulls live station data from the Citi Bike REST API using Python and saves the raw JSON data locally. I am building the project step by step so I can understand how each part of a real data pipeline works.
+This project uses live NYC Citi Bike station data to demonstrate how data moves through a real data engineering pipeline.
 
-The final goal is to connect the full flow from API ingestion all the way to SQL, a data warehouse, cloud storage, and Power BI.
+The pipeline currently extracts live data from the Citi Bike REST API, stores the raw JSON response, transforms the data into a clean tabular format, and loads the processed data into a MySQL database.
+
+Future stages will expand the project into dimensional modeling, a data warehouse, Microsoft Azure, and Power BI.
+
+---
 
 ## Current Architecture
 
@@ -16,76 +17,104 @@ Citi Bike REST API
         ↓
       Python
         ↓
- Raw JSON Files
-   data/raw/
+   Raw JSON Files
+     data/raw/
+        ↓
+      Pandas
+        ↓
+ Transformed Data
+  data/processed/
+        ↓
+      MySQL
 ```
+
+---
 
 ## Current Status
 
-Completed:
+### Completed
 
-* REST API connection
-* Python data extraction
-* Timestamped raw JSON storage
-* Basic error handling
+- REST API connection
+- Live Citi Bike data extraction
+- Timestamped raw JSON storage
+- Basic error handling
+- Data transformation with Pandas
+- Processed data storage
+- MySQL database connection
+- Loading transformed data into MySQL
+- Environment-variable based database credentials
+- Git protection for sensitive `.env` credentials
 
-Planned next:
+### Planned Next
 
-* Data cleaning and transformation
-* SQL database
-* Data warehouse
-* Star schema
-* Fact and dimension tables
-* Microsoft Azure
-* Power BI dashboard
+- Data warehouse design
+- Star schema
+- Fact and dimension tables
+- Microsoft Azure
+- Azure Blob Storage
+- Azure SQL Database
+- Power BI dashboard
+
+---
 
 ## Tech Stack
 
-Currently used:
+### Currently Used
 
-* Python
-* REST API
-* JSON
-* requests
-* Git
-* GitHub
+- Python
+- REST API
+- JSON
+- Pandas
+- MySQL
+- SQL
+- SQLAlchemy
+- python-dotenv
+- requests
+- Git
+- GitHub
 
-Planned:
+### Planned
 
-* Pandas
-* SQL
-* PostgreSQL / Azure SQL
-* Azure Blob Storage
-* ETL
-* Data Pipelines
-* Data Warehousing
-* Dimensional Modeling
-* Power BI
+- Data Warehousing
+- Dimensional Modeling
+- Star Schema
+- Microsoft Azure
+- Azure Blob Storage
+- Azure SQL Database
+- Power BI
+
+---
 
 ## Project Steps
 
 ### Step 1 — Extract ✅
 
-The first step is to connect Python to the live Citi Bike API and pull current station data.
+The pipeline connects to the live Citi Bike REST API and retrieves current station-status data.
 
-The API gives information such as:
+The API provides information such as:
 
-* Station ID
-* Bikes available
-* E-bikes available
-* Docks available
-* Station status
-* Last reported time
+- Station ID
+- Bikes available
+- E-bikes available
+- Docks available
+- Station status
+- Last reported time
+
+The extraction logic is handled in:
+
+```text
+src/extract.py
+```
+
+---
 
 ### Step 2 — Raw Storage ✅
 
-After pulling the data, I save the original API response as a JSON file inside:
+The original API response is saved as a timestamped JSON file inside:
 
 ```text
 data/raw/
 ```
-
-I add a timestamp to every file so each API pull can be stored separately.
 
 Example:
 
@@ -93,63 +122,127 @@ Example:
 station_status_20260815_210801.json
 ```
 
-I keep the raw data unchanged first so I always have the original source before doing any cleaning or transformation.
+Keeping the raw data unchanged preserves the original source before any transformation takes place.
 
-### Step 3 — Transform 🚧 Planned
+---
 
-Next, I will use Python and Pandas to clean and organize the raw data.
+### Step 3 — Transform ✅
 
-This will include things like:
+The raw Citi Bike JSON data is transformed using Python and Pandas.
 
-* Handling missing values
-* Fixing data types
-* Selecting useful columns
-* Restructuring the JSON data
-* Preparing the data for SQL
+The transformation process includes:
 
-### Step 4 — Load into SQL 🚧 Planned
+- Reading the raw API data
+- Selecting useful fields
+- Restructuring nested JSON data
+- Cleaning the dataset
+- Preparing the data for SQL
+- Saving processed output
 
-After transformation, the cleaned data will be loaded into a SQL database.
-
-This is where I will start working with SQL tables and queries instead of only JSON files.
-
-### Step 5 — Data Warehouse & Modeling 🚧 Planned
-
-The next stage will be to organize the SQL data into a proper warehouse structure.
-
-I plan to create a Star Schema with tables such as:
+The transformation logic is handled in:
 
 ```text
-fact_station_snapshots
-dim_stations
-dim_date_time
+src/transform.py
 ```
 
-The fact table will store changing station measurements, while the dimension tables will store descriptive information such as station and date/time details.
+Processed data is stored inside:
 
-### Step 6 — Microsoft Azure 🚧 Planned
+```text
+data/processed/
+```
 
-After the local pipeline is working, I plan to move the project into Microsoft Azure.
+---
 
-The cloud part of the project is planned to use:
+### Step 4 — Load into MySQL ✅
 
-* Azure Blob Storage
-* Azure SQL Database
+The transformed Citi Bike data is loaded into a MySQL database using SQLAlchemy.
 
-This will help me understand how the same pipeline works in a cloud environment.
+The loading logic is handled in:
 
-### Step 7 — Power BI 🚧 Planned
+```text
+src/load.py
+```
 
-The final step will be to connect the processed warehouse data to Power BI.
+The local database used by this project is:
 
-The dashboard will be used to look at things like:
+```text
+citibike_etl
+```
 
-* Bike availability
-* E-bike availability
-* Empty stations
-* Full stations
-* Busy time periods
-* Station usage patterns
+Before running the load script, create the database in MySQL:
+
+```sql
+CREATE DATABASE citibike_etl;
+```
+
+Database credentials are not hard-coded in the Python source code.
+
+Instead, the project reads them from a local `.env` file.
+
+---
+
+## Environment Setup
+
+The repository includes:
+
+```text
+.env.example
+```
+
+Use it as a template to create your own local `.env` file.
+
+Example:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password_here
+DB_NAME=citibike_etl
+```
+
+The real `.env` file is included in `.gitignore` and should never be committed to GitHub.
+
+Your local `.env` file should contain your own MySQL credentials.
+
+---
+
+## Installation
+
+Clone the repository and install the required Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file contains the Python libraries required to run the project.
+
+---
+
+## Running the Pipeline
+
+### 1. Extract data
+
+```bash
+python src/extract.py
+```
+
+### 2. Transform data
+
+```bash
+python src/transform.py
+```
+
+### 3. Load data into MySQL
+
+Make sure MySQL is running and the `citibike_etl` database has been created.
+
+Then run:
+
+```bash
+python src/load.py
+```
+
+---
 
 ## Repository Structure
 
@@ -161,38 +254,94 @@ cloud-data-engineering-pipeline/
 │   └── processed/
 │
 ├── src/
-│   └── extract.py
+│   ├── extract.py
+│   ├── transform.py
+│   └── load.py
 │
+├── .env.example
 ├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
 
-This structure will grow as I add transformation, SQL, cloud, data warehouse, and Power BI parts.
+The local `.env` file is intentionally excluded from GitHub.
+
+---
+
+## Next Stage — Data Warehouse & Dimensional Modeling 🚧
+
+The next phase will organize the SQL data into a dimensional model.
+
+The planned Star Schema will include tables such as:
+
+```text
+fact_station_snapshots
+dim_stations
+dim_date_time
+```
+
+The fact table will store changing station measurements, while the dimension tables will contain descriptive station and date/time information.
+
+---
+
+## Future Cloud Architecture 🚧
+
+After the local ETL pipeline and dimensional model are complete, the project will be extended into Microsoft Azure.
+
+Planned cloud technologies include:
+
+- Azure Blob Storage
+- Azure SQL Database
+
+The goal is to move the same ETL workflow from a local environment into a cloud-based data engineering architecture.
+
+---
+
+## Power BI 🚧
+
+The final analytics layer will connect the processed warehouse data to Power BI.
+
+The dashboard is planned to analyze metrics such as:
+
+- Bike availability
+- E-bike availability
+- Empty stations
+- Full stations
+- Busy time periods
+- Station usage patterns
+
+---
 
 ## Final Project Goal
 
-The full project will eventually look like this:
+The complete project architecture is planned to become:
 
 ```text
 REST API
    ↓
-Python
+Python Extraction
    ↓
-ETL
+Raw Storage
    ↓
-Cloud Storage
+Transformation
    ↓
-SQL
+MySQL / SQL
    ↓
 Data Warehouse
    ↓
 Star Schema
    ↓
+Microsoft Azure
+   ↓
 Power BI
 ```
 
+---
+
+## Project Status
+
 This project is currently **in progress**.
 
-The API ingestion and raw storage stages are completed, and I will continue building the remaining stages step by step.
+The Extract, Transform, and MySQL Load stages are complete.
 
+The next stages will focus on dimensional modeling, data warehousing, cloud deployment with Microsoft Azure, and Power BI analytics.

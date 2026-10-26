@@ -53,7 +53,8 @@ def save_raw_data(data):
 #EXCUTION BLOCK
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def main():
     print("Starting Citi Bike API ingestion...")
 
     try:
@@ -65,3 +66,7 @@ if __name__ == "__main__":
 
     except Exception:
         print("Ingestion pipeline failed.")
+
+if __name__ == "__main__":
+    main()
+
